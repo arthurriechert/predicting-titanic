@@ -4,9 +4,6 @@ import numpy as np
 # Getting data
 import model.load_data as ld
 
-# Visualize data
-import model.visualize as v
-
 # Generating random parameters
 import random
 
@@ -127,6 +124,3 @@ def run():
            ########## INITIAL PREDICTIONS ##########
            
            {predictions}""")
-
-    # Plot features
-    v.plot_features(X_train, Y_train, predictions)
