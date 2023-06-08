@@ -12,7 +12,7 @@ def correct_nan_values(np_array):
         np_array (ndim): An n-dimensional numpy array
 
     Returns:
-        corrected_array (ndim): An n-dimensional numpy array
+        np_array (ndim): An n-dimensional numpy array
 
     """
     
@@ -29,18 +29,20 @@ def correct_nan_values(np_array):
         mean = np.nanmean(np_array)
 
         # Replace nan with the mean
-        corrected_array =np.where(np.isnan(np_array), mean, np_array)
-
+        np_array =np.where(np.isnan(np_array), mean, np_array)
+    
     elif dimension == 2:
 
-        # Get the mean for each column
-        mean = np.nanmean(np_array, axis=0)
+        # Loop through each column
+        for i in range(np_array.shape[1]):
 
-        # Determine where the nan values are
-        indices = np.where(np.isnan(np_array))
-        correct_array[indices] = np.take(mean, indices[1])
+            # Get the mean for each column, ignoring nan values
+            mean = np.nanmean(np_array[:, i])
 
-    return correct_array
+            # Replace nan with the mean of the respective column
+            np_array[:, i] = np.where(np.isnan(np_array[:, i]), mean, np_array[:, i])
+
+    return np_array
 
 def get_training_sets():
     """
@@ -56,22 +58,17 @@ def get_training_sets():
     """
 
     # Load data from csv
-    data = pd.read_csv("../../data/train.csv")
-    
-    # Initialize X_train and Y_train
-    m = len(data)
-    X_train = np.empty((m, 2))
-    Y_train = np.empty(m)
+    data = pd.read_csv("../data/train.csv")
 
     # Organize features, refer to README for more info
-    X_train[:,0] = data.Fare
-    X_train[:,1] = data.Age
+    data["Age x Fare"] = data["Age"] * data["Fare"]
+    X_train = data[["Age", "Fare", "Age x Fare"]].to_numpy()
 
     # Remove nan
     X_train = correct_nan_values(X_train)
 
     # Organize dependent variables
-    Y_train = data.Survived
+    Y_train = data["Survived"]
 
     # Remove nan
     Y_train = correct_nan_values(Y_train)
@@ -100,7 +97,11 @@ def get_training_sets():
 
            \033[32mDimensions of X: {X_train.ndim}\033[0m
 
-           \033[34mDimensions of Y: {Y_train.ndim}\033[0m""")
+           \033[34mDimensions of Y: {Y_train.ndim}\033[0m
+
+           \033[32mX NaN Values: {np.any(np.isnan(X_train))}\033[0m
+
+           \033[34mY NaN Values: {np.any(np.isnan(Y_train))}\033[0m""")
 
     return X_train, Y_train
 
@@ -118,22 +119,17 @@ def get_testing_sets():
     """
 
     # Load data from csv
-    data = pd.read_csv("../../data/train.csv")
+    data = pd.read_csv("../data/train.csv")
     
-    # Initialize X_train and Y_train
-    m = len(data)
-    X_test = np.empty((m, 2))
-    Y_test = np.empty(m)
-
     # Organize features, refer to README for more info
-    X_test[:,0] = data.Fare
-    X_test[:,1] = data.Age
-
+    data["Age x Fare"] = data["Age"] * data["Fare"]
+    X_test = data[["Age", "Fare", "Age x Fare"]].to_numpy()
+   
     # Remove nan
     X_test = correct_nan_values(X_test)
 
     # Organize dependent variables
-    Y_test = data.Survived
+    Y_test = data["Survived"]
 
     # Remove nan
     Y_test = correct_nan_values(Y_test)
@@ -162,9 +158,10 @@ def get_testing_sets():
 
            \033[36mDimensions of X: {X_test.ndim}\033[0m
 
-           \033[37mDimensions of Y: {Y_test.ndim}\033[0m""")
+           \033[37mDimensions of Y: {Y_test.ndim}\033[0m
+          
+           \033[32mX NaN Values: {np.any(np.isnan(X_test))}\033[0m
+
+           \033[34mY NaN Values: {np.any(np.isnan(Y_test))}\033[0m""")
 
     return X_test, Y_test
-
-get_training_sets()
-get_testing_sets()
