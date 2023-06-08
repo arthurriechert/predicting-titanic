@@ -1,3 +1,7 @@
+from model.linear_regression_model import run
+
 # Run as a package
 if __name__ == "__main__":
-    pass
+
+    # Run the model
+    run()
