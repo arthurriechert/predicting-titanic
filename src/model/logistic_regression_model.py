@@ -68,6 +68,35 @@ def compute_predictions(W, X, b):
 
     return Y_hat
 
+def compute_cost(W, X, b, Y):
+    """
+    Use log loss to compute the cost
+
+    Args:
+        W (ndarray): Contains weights for model
+        X (ndarray): Contains independent variables
+        b (float): Scalar bias
+        Y (ndarray): Given answers
+
+    Returns:
+        cost (float): Scalar
+
+    """
+
+    # Get number of examples
+    m = X.shape[0]
+
+    # Get predictions
+    Y_hat = compute_predictions(W, X, b)
+
+    # Compute the loss
+    loss = Y * np.log(Y_hat) - (1 - Y) * np.log(Y_hat)
+
+    # Get the mean
+    cost = -1 / m * np.sum(loss)
+
+    return cost
+
 def run():
     """
     A basic setup to run the model
@@ -119,8 +148,16 @@ def run():
     # Apply sigmoid
     predictions = sigmoid(predictions)
 
+    # Compute initial cost
+    cost = compute_cost(W, X_train, b, Y_train)
+
     # Print diagnostics
     print(f"""
            ########## INITIAL PREDICTIONS ##########
            
-           {predictions}""")
+           {predictions}
+
+
+           ############# INITIAL COST ##############
+            
+           {cost}""")
