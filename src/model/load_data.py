@@ -62,7 +62,7 @@ def get_training_sets():
 
     # Organize features, refer to README for more info
     data["Age x Fare"] = data["Age"] * data["Fare"]
-    X_train = data[["Age", "Fare", "Age x Fare"]].to_numpy()
+    X_train = data[["Age", "Fare"]].to_numpy()
 
     # Remove nan
     X_train = correct_nan_values(X_train)
@@ -123,7 +123,7 @@ def get_testing_sets():
     
     # Organize features, refer to README for more info
     data["Age x Fare"] = data["Age"] * data["Fare"]
-    X_test = data[["Age", "Fare", "Age x Fare"]].to_numpy()
+    X_test = data[["Age", "Fare"]].to_numpy()
    
     # Remove nan
     X_test = correct_nan_values(X_test)

@@ -44,9 +44,11 @@ def sigmoid(z):
 
     """
 
+    z = np.clip(z, -500, 500)  # clip to avoid overflow in np.exp 
+
     # Apply sigmoid
     g_z = 1 / (1 + np.exp(-z))
-
+       
     return g_z
 
 def compute_predictions(W, X, b):
@@ -65,6 +67,9 @@ def compute_predictions(W, X, b):
 
     # Compute the dot product
     Y_hat = np.dot(X,W) + b
+
+    # Apply sigmoid
+    Y_hat = sigmoid(Y_hat)
 
     return Y_hat
 
@@ -89,13 +94,88 @@ def compute_cost(W, X, b, Y):
     # Get predictions
     Y_hat = compute_predictions(W, X, b)
 
+    # Small constant to prevent log(0)
+    eps = 1e-15
+
+    # Clipping values to ensure they fall within [eps, 1-eps]
+    Y_hat = np.clip(Y_hat, eps, 1 - eps)
+
     # Compute the loss
-    loss = Y * np.log(Y_hat) - (1 - Y) * np.log(Y_hat)
+    loss = -Y * np.log(Y_hat) - (1 - Y) * np.log(1 - Y_hat)
 
     # Get the mean
-    cost = -1 / m * np.sum(loss)
+    cost = np.mean(loss)
 
     return cost
+
+def compute_gradient(W, X, b, Y):
+    """
+    Compute the partial derivatives
+
+    Args:
+        W (ndarray): Contains weights for models
+        X (ndarray): Contains independent variables
+        b (float): Scalar bias
+        Y (ndarray): Given answers
+
+    Returns:
+        gradient_W (ndarray): Partial derivatives of cost with respect to W
+        gradient_b (ndarray): Partial derivatives of cost with respect to b
+
+    """
+
+    # Get predictions
+    Y_hat = compute_predictions(W, X, b)
+
+    # Compute loss
+    loss = Y_hat - Y
+
+    # Compute gradients
+    grad_W = np.dot(X.T, loss) / X.shape[0]
+    grad_b = np.sum(loss) / X.shape[0]
+    
+    return grad_W, grad_b
+
+def gradient_descent(W, X, b, Y, epochs, alpha):
+    """
+    Performs standard gradient descent
+
+    Args:
+        W (ndarray): Contains weights for models
+        X (ndarray): Contains independent variables
+        b (float) Scalar bias
+        Y (ndarray): Given answers
+        epochs (int): Number of times to perform gradient descent
+        alpha (float): Learning rate
+
+    Returns:
+        W (ndarray): Update version of W
+        b (float): Updated version of b
+
+    """
+
+
+    # Perform number of gradient descent
+    for epoch in range(epochs):
+
+        # Get the gradients
+        grad_W, grad_b = compute_gradient(W, X, b, Y)
+
+        # Get the cost
+        cost = compute_cost(W, X, b, Y)
+
+        # Update parameters
+        W = W - alpha * grad_W
+        b = b - alpha * grad_b
+
+        # Print diagnostics every 100 iterations
+        if epoch % 100 == 0:
+            print(f"\n#{epoch} -> COST: {cost} | W: {W} | b: {b} | d_W: {grad_W} | d_b: {grad_b}")
+
+    # Print diagnostic
+    print(f"\n\033[32mW optimized at {W} | b optimized at {b}")
+
+    return W, b
 
 def run():
     """
@@ -161,3 +241,14 @@ def run():
            ############# INITIAL COST ##############
             
            {cost}""")
+
+    # Get settings
+    alpha = float(input("\nLEARNING RATE > "))
+    epochs = int(input("\nITERATIONS > "))
+
+    # Create placeholders
+    W_final = np.empty((m,n))
+    b_final = 0
+
+    W_final, b_final = gradient_descent(W, X_train, b, Y_train, epochs, alpha)
+     
